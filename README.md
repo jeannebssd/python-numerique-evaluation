@@ -7,6 +7,8 @@ Lisez bien ce document jusqu'au bout !
 Ce projet constitue l'évaluation de la partie python-numérique de l'ECUE PE.
 Le sujet est proposé par `Laurent Lacourt`; le problème et les données sont réels. Nous vous demandons de ne pas les diffuser sur Internet.
 
+Le sujet se trouve dans le fichier `00-eval-pe.nb.py`. Vous devez compléter ce notebook avec vos implémentations et remarques. 
+
 
 **Réalisation, condition et date de rendu du projet**  
 * le projet doit être réalisé **individuellement**
