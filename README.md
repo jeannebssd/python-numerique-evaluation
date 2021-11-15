@@ -35,7 +35,7 @@ Sans vouloir le moins du monde être désagréables, nous vous prévenons que le
 * Pour les élèves en `C++`, ceux qui le veulent peuvent s'y conformer mais ce n'est pas obligatoire . 
 
 
-## Installation des modules nécessaires nécessaires
+## Installation des modules nécessaires
 
 Afin de visualiser une partie des données qui vous sont mises à disposition pour ce projet, vous devez installer un module spécifique. Pour ne pas surcharger votre environnement de base, nous vous conseillons de créer un environnement spécifique à l'évaluation et d'y installer les modules nécessaires: 
 
