@@ -14,11 +14,11 @@
 #
 # Prénom: Jeanne
 #
-# Nom: ???
+# Nom: Bessoud
 #
-# Langage-avancé (Python ou C++): ???
+# Langage-avancé (Python ou C++): Python
 #
-# Adresse mail: ???
+# Adresse mail: jeanne.bessoud@mines-paris.fr
 #
 # ***
 
@@ -35,7 +35,9 @@
 # Importez les librairies numériques utiles au projet, pour le début du projet, il s'agit de `pandas`, `numpy` et `pyplot` de `matplotlib`.
 
 # %%
-# votre code ici
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 # %% [markdown]
 # ## Lecture des données
@@ -50,7 +52,10 @@
 # Affichez la forme et les deux dernières lignes de la data-frame.
 
 # %%
-# votre code ici
+df = pd.read_csv("defect_data.csv", index_col='id', usecols=range(0,10))
+print(df.shape)
+df.tail(2)
+df
 
 # %% [markdown]
 # ### Parenthèse sur descripteurs morphologiques 
@@ -146,7 +151,7 @@ reload(plt)
 # À partir de maintenant vous pouvez vous amuser ! 
 
 # On récupère un id intéressant
-id_to_plot = df.index[df['convexity'].argmin()]
+id_to_plot = df.index[df['lambda1'].argmax()]
 # On affiche à l'écran les valeurs de ses descripteurs
 print(df.loc[id_to_plot])
 # On l'affiche
@@ -164,7 +169,24 @@ plot_defect(4022)
 # On vous parlait juste avant de défauts de morphologie proche ! Et si une simple distance euclidienne en dimension 9 fonctionnait ? Calculez le défaut le plus proche du défaut `4022` dans l'espace de dimension 9, et tracez-le ! Se ressemblent-ils ?
 
 # %%
-# Votre code ici
+ligne_4022 = df.loc[4022]
+s_min = 0
+for j in range (9): #on definit la distance euclidienne min initiale comme celle entre le défaut 1 et le 4022 
+    s_min += (ligne_4022.iloc[j] - df.iloc[0, j]) ** 2
+d_min = np.sqrt(s_min)
+i_min = 0
+
+for k in range (1, 4040): #on parcourt tout les défauts 
+    s = 0 
+    if k != 4022 : #on exclu le defaut 4022 ou la distance à lui-meme est nulle 
+        for j in range (9):
+            s += (ligne_4022.iloc[j] - df.iloc[k, j]) ** 2
+            distance = np.sqrt(s)
+            if distance < d_min :
+                d_min = distance
+                i_min = k
+print(i_min)
+    
 
 # %% [markdown]
 # **Eh non!** Le défaut le plus proche du défaut `4022` est une patatoïde quelconque. Deux explications sont possibles :
