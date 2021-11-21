@@ -224,8 +224,13 @@ reload(plt)
 
 # %%
 def histogram(serie, nbins) :
-    X = [k for k in serie.iloc[k]]
-    plt.hist(X, nbins)
+    """
+    returns the histogram of a series of point, regrouping the values around nbins values 
+    """
+    L=[]
+    for k in range(4040):
+        L.append(serie.iloc[k])
+    plt.hist(L, nbins)
     plt.show()
 
 
@@ -238,6 +243,7 @@ histogram(df['radius1'], nbins=10)
 # pour vérifier
 # c'est bien si votre fonction marche aussi avec une dataframe
 histogram(df[['radius1']], nbins=10)
+
 
 # %% [markdown]
 # #### *Bonus* : un histogramme adaptable aux goûts de chacun
@@ -256,7 +262,19 @@ histogram(df[['radius1']], nbins=10)
 # <img src="media/defects-histogram2.png" width="400px">
 
 # %%
-# votre code ici
+def histogram2(serie, nbins, xlabel,ylabel,hist_kwargs) :
+    """
+    returns the histogram of a series of point, regrouping the values around nbins values 
+    """
+    L=[]
+    for k in range(4040):
+        L.append(serie.iloc[k])
+    plt.hist(L, nbins, color = hist_kwargs['color'])
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.show()
+
+
 
 # %%
 # pour vérifier
