@@ -204,6 +204,7 @@ plot_defect(796)
 # %matplotlib inline
 reload(plt)
 
+
 # %% [markdown]
 # ## Visualisation des données
 #
@@ -222,7 +223,12 @@ reload(plt)
 # <img src="media/defects-histogram.png" width="400px">
 
 # %%
-# votre code ici
+def histogram(serie, nbins) :
+    X = [k for k in serie.iloc[k]]
+    plt.hist(X, nbins)
+    plt.show()
+
+
 
 # %%
 # pour vérifier
