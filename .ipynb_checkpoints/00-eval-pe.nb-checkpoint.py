@@ -287,6 +287,7 @@ if 'histogram2' in globals():
 else:
     print("vous avez choisi de ne pas faire le bonus")
 
+
 # %% [markdown]
 # ### Tracé de nuages de points
 #
@@ -299,11 +300,15 @@ else:
 # <img src="media/defects-correlation.png" width="400px">
 
 # %%
-# votre code ici
+def correlation_plot(s1,s2):
+    plt.scatter(s1,s2)
+    plt.show()
+
 
 # %%
 # pour vérifier
 correlation_plot(df['lambda1'], df['lambda2'])
+
 
 # %% [markdown]
 # #### *Bonus* les nuages de points pour l'utilisateur casse-pieds (ou daltonien ;) )
@@ -320,7 +325,13 @@ correlation_plot(df['lambda1'], df['lambda2'])
 # <img src="media/defects-correlation2.png" width="400px">
 
 # %%
-# votre code ici
+def correlation_plot2(s1, s2, xlabel, ylabel, plot_kwargs):
+    plt.scatter(s1, s2, marker = plot_kwargs['marker'], color = plot_kwargs['color'])
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.show()
+
+
 
 # %%
 # pour vérifier 
@@ -332,6 +343,7 @@ if 'correlation_plot2' in globals():
                       plot_kwargs={'marker': 'x', 'color': 'red'})
 else:
     print("vous avez choisi de ne pas faire le bonus")    
+
 
 # %% [markdown]
 # #### *Bonus 2* Tracer le triangle d'inertie en plus
@@ -345,7 +357,24 @@ else:
 # (Vous pouvez faire ce bonus sans avoir fait le précédent)
 
 # %%
-# Votre code ici
+def f(x):
+    if 1/3 < x < 1/2 :
+        return(-0.5 ** x + 0.5) #calculé à partir de la pente et de l'ordonnée à l'origine
+
+f1=np.vectorize(f)
+
+def f2(x):
+    if 1/3 < x < 1/2 :
+        return(x)
+    
+X = np.linspace(0.20, 0.55, 100)
+Y1 = f1(X)
+Y2 = f2(X)
+Y3 = np.array([0.5]*20)
+Y = np.concatenate((Y1, Y2, Y3))
+plt.plot(X, Y, linestyle = 'dashed', color = 'red')
+plt.show()
+
 
 # %% [markdown]
 # ### Affichage de tous les plots des colonnes
@@ -360,12 +389,23 @@ else:
 # <img src="media/defects-plot2d.png" width="200px">
 
 # %%
-# votre code ici
+def plot2D(df):
+    for colonne in df.columns :
+        print(histogram2(df[colonne], nbins = 10, xlabel = colonne, ylabel = 'frequency',
+       histkwargs = {'color': 'red'}))
+    
+    n = len(list(df.columns)) #nombre de colonnes 
+    for i in range(n-1):
+        for j in range(i+1, n):
+            print(correlation_plot2(df[i], df[j], xlabel = df.columns[i], ylabel = df.columns[j], plot_kwargs = {'marker': 'x', 'color': 'red'}))
+
+
 
 # %%
 # pour corriger
 
 plot2D(df[['radius1', 'lambda1', 'lambda2']])
+
 
 # %% [markdown]
 # #### *Bonus++* (dataviz expert-level) le tableau des plots des colonnes
@@ -379,7 +419,20 @@ plot2D(df[['radius1', 'lambda1', 'lambda2']])
 # <img src="media/defects-matrix.png" width="500px">
 
 # %%
-# votre code ici
+def scatter_matrix(df):
+    n = len(list(df.columns)) #nombre de colonnes 
+    M = np.zeros((n,n) 
+    c = 0
+    for colonne in df.columns : #on trace la diagonale
+        M[c,c] = histogram2(df[colonne], nbins = 10, xlabel = colonne, ylabel = 'frequency',
+       hist_kwargs={'color': 'red'})
+        c+=1
+    for i in range(n):
+        for j in range(n):
+            if i!=j : 
+                M[i,j] = correlation_plot2(df[i], df[j], xlabel = df.columns[i], ylabel = df.columns[j], plot_kwargs = {'marker': 'x', 'color': 'red'})
+
+
 
 # %%
 # pour vérifier 
@@ -395,7 +448,10 @@ scatter_matrix(df[['radius1', 'lambda1', 'b2']], nbins=100, hist_kwargs={'fc': '
 #
 
 # %%
-# votre code ici
+for k in range len(df.columns):
+    print(scatter_matrix(df[['radius1', 'lambda1', 'b2']], nbins=100, hist_kwargs={'fc': 'g'}))
+    
+plt.plot()
 
 # %% [markdown]
 # ## Analyse en composantes principales (ACP)
@@ -412,7 +468,8 @@ scatter_matrix(df[['radius1', 'lambda1', 'b2']], nbins=100, hist_kwargs={'fc': '
 # Construisez une matrice des niveaux de corrélation des caractéristiques. Elle doit être carrée de taille 9x9.
 
 # %%
-# votre code ici
+X = df.to_numpy()
+C = np.dot(np.transpose(X), X)
 
 # %% [markdown]
 # ### Calcul des vecteur propres et valeurs propres de la matrice de corrélation
@@ -421,7 +478,11 @@ scatter_matrix(df[['radius1', 'lambda1', 'b2']], nbins=100, hist_kwargs={'fc': '
 # Calculez à l'aide du module `numpy.linalg` les valeurs propres et les vecteurs propres de la matrice $C$. Cette dernière est symétrique définie positive par construction, toutes ses valeurs propres sont strictement positives.
 
 # %%
-# votre code ici
+import numpy.linalg as alg
+valpropres, mat = alg.eig(C) #eig renvoie un tuple d'un array valeurs propres de C et d'un array de vecteurs propres en colonnes
+vectpropres=np.transpose(mat) #pour une meilleure lisibilité
+
+print(valpropres, vectpropres) # retourne des arrays contenant les valeurs propres et vecteurs propres de C
 
 # %% [markdown]
 # ### Tracé des valeurs propres
@@ -430,7 +491,14 @@ scatter_matrix(df[['radius1', 'lambda1', 'b2']], nbins=100, hist_kwargs={'fc': '
 # Tracez les différentes valeurs propres calculées en utilisant un axe logarithmique.
 
 # %%
-# votre code ici
+m, M = min(valpropres), max(valpropres)
+pas = (M-m)/len(valpropres)
+X=np.arange(int(m), int(M), pas)
+plt.loglog(X, valpropres, markersize=30)
+plt.show()
+plt.semilogy(X, valpropres, markersize=30)
+plt.show()
+
 
 # %% [markdown]
 # ### Analyse de l'importance relative des composantes principales
@@ -475,7 +543,11 @@ scatter_matrix(df[['radius1', 'lambda1', 'b2']], nbins=100, hist_kwargs={'fc': '
 # Menez la même étude que précédement (i.e. à partir de la section `Analyse en composantes principales`) jusqu'à tracer l'évolution des $\alpha_i$.
 
 # %%
-# votre code ici
+def standardiser(Y):
+    moyenne = np.mean(Y)
+    ecart_type = np.std(Y)
+    return((Y - moyenne) / ecart_type)
+standardiser([1,2])
 
 # %% [markdown]
 # ### Importance des composantes principales
