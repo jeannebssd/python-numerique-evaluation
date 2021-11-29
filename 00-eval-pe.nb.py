@@ -186,7 +186,7 @@ for k in range (1, 4040): #on parcourt tout les défauts
                 d_min = distance
                 i_min = k
 print(i_min)
-    
+
 
 # %% [markdown]
 # **Eh non!** Le défaut le plus proche du défaut `4022` est une patatoïde quelconque. Deux explications sont possibles :
@@ -391,13 +391,11 @@ plt.show()
 # %%
 def plot2D(df):
     for colonne in df.columns :
-        print(histogram2(df[colonne], nbins = 10, xlabel = colonne, ylabel = 'frequency',
-       histkwargs = {'color': 'red'}))
-    
+        print(histogram2(df[colonne], nbins = 20, xlabel = colonne, ylabel = 'frequency', hist_kwargs= {'color': 'blue'}))
     n = len(list(df.columns)) #nombre de colonnes 
-    for i in range(n-1):
-        for j in range(i+1, n):
-            print(correlation_plot2(df[i], df[j], xlabel = df.columns[i], ylabel = df.columns[j], plot_kwargs = {'marker': 'x', 'color': 'red'}))
+    for i in range(1):
+        for j in range(i+1, 2):
+            print(correlation_plot2(df[df.columns[i]], df[df.columns[j]], xlabel = df.columns[i], ylabel = df.columns[j], plot_kwargs = {'marker': 'x', 'color': 'black'}))
 
 
 
@@ -495,8 +493,10 @@ m, M = min(valpropres), max(valpropres)
 pas = (M-m)/len(valpropres)
 X=np.arange(int(m), int(M), pas)
 plt.loglog(X, valpropres, markersize=30)
+plt.legend('Tracé en echelle log-log')
 plt.show()
 plt.semilogy(X, valpropres, markersize=30)
+plt.legend('Tracé en echelle semi-log')
 plt.show()
 
 
