@@ -432,9 +432,9 @@ def scatter_matrix(df, nbins, hist_kwargs):
     without repetition of the correlation of the couple of columns.
     """
     n = len(list(df.columns)) #nombre de colonnes 
-    fig, axs = plt.subplots(n, n)
+    fig, axs = plt.subplots(n, n, figsize=(15,15))
     for i in range(n) : #on rempli la diagonale du tableau avec les histogrammes
-        axs[i, i].hist(df.iloc[:,i], nbins)
+        axs[i, i].hist(df.iloc[:,i], nbins, color=hist_kwargs['color'])
         for j in range (n): #on parcourt les autres colonnes
             if j != i : 
                 axs[i, j].scatter(df.iloc[:,i], df.iloc[:,j], s=1)
@@ -455,17 +455,11 @@ scatter_matrix(df[['radius1', 'lambda1', 'b2']], nbins=100, hist_kwargs={'color'
 #
 
 # %%
-#L=[index for index in list(df.index) if 0.33 < df.iloc[index,1]< 0.35 and 0.33 < df.iloc[index,2]< 0.35]
-#print(L)
-L2=[i for i in list(df['id']) if 0.33 < df.iloc[index,1]< 0.35 and 0.33 < df.iloc[index,2]< 0.35]
-print(L2)
+# on observe toutes les correlations : scatter_matrix(df[df.columns], nbins=100, hist_kwargs={'color': 'g'})
 
+#la meilleur correlation semble etre celle entre la 4eme et la 5eme colonne, pusiqu'on voit apparaitre une droite linéaire sur le graphe de corrélation
 
-# %%
-list(df.index)[-1]
-
-list(df.loc[:,'id'])
-
+scatter_matrix(df[['convexity','sphericity']], nbins=100, hist_kwargs={'color': 'g'})
 
 # %% [markdown]
 # ## Analyse en composantes principales (ACP)
@@ -483,7 +477,7 @@ list(df.loc[:,'id'])
 
 # %%
 X = df.to_numpy()
-C = np.dot(np.transpose(X), X)
+C = np.dot(np.transpose(X), X) #matrice de taille (9,9)
 
 # %% [markdown]
 # ### Calcul des vecteur propres et valeurs propres de la matrice de corrélation
@@ -505,13 +499,11 @@ print(valpropres, vectpropres) # retourne des arrays contenant les valeurs propr
 # Tracez les différentes valeurs propres calculées en utilisant un axe logarithmique.
 
 # %%
-m, M = min(valpropres), max(valpropres)
-pas = (M-m)/len(valpropres)
-X=np.arange(int(m), int(M), pas)
-plt.loglog(X, valpropres, markersize=30)
+X=np.arange(1, 10, 1)
+plt.loglog(X, valpropres, marker='o')
 plt.title('Tracé en echelle log-log des valeurs propres')
 plt.show()
-plt.semilogy(X, valpropres, markersize=30)
+plt.semilogy(X, valpropres, marker='o')
 plt.title('Tracé en echelle semi-log des valeurs propres')
 plt.show()
 
@@ -530,8 +522,8 @@ plt.show()
 # $\alpha_i$ peut être interprété comme *la part d'information du jeu de données initial contenu dans les $i$ premières composantes principales*.
 
 # %%
-import copy
 V = list(valpropres)
+print(V) #listes des valeurs propres déjà triée dans l'ordre décroissant
 N = len(V)
 LY=[] #liste des alpha_i 
 S_N = sum(V[:N])
@@ -540,11 +532,10 @@ for i in range (N):
     LY.append(S_i / S_N)
 Y = np.array(LY)
 X = np.arange(0, len(LY), 1)
-plt.title(" Tracé en echelle log-log de l'évolution de alpha_i ")
-plt.loglog(X, Y, marker='+')
+plt.title(" Tracé en echelle semilogy de l'évolution de alpha_i ")
+plt.plot(X, Y, marker='+')
 plt.show()
 
-#
 
 # %% [markdown]
 # ### Quantité d'information contenue par la plus grande composante principale
@@ -560,12 +551,21 @@ plt.show()
 # En observant les données correspondant à cette caractéristique, avez-vous une idée de ce qui s'est passé ? 
 
 # %%
-valpropre_max = V[0] #valeur propre max = la première car liste triée dans l'ordre décroissant
+eigenvalue_max = V[0] #valeur propre max = la première car liste triée dans l'ordre décroissant
 V2 = list(vectpropres)
-vecteurpropre_max = V2[0] #vecteur propre max 
-L_vpmax = list(vecteurpropre_max)
+print ("La valeur propre max est", V[0], "et le vecteur propre associé est", V2[0]) 
+
+
+#on sait que l'info est contenue dans les alpha_i
+S=sum(V)
+print( "La quantité d'information contenue par cette composante est de", V[0]/S, "%.") 
+
+L_eigvectmax = list(vecteurpropre_max)
 maxi = max([-min(L_vpmax), max(L_vpmax )]) 
-print(maxi) #affiche le coefficient max du vecteur propre
+print("Le coefficient max en valeur absolu de cette composante principale est :", maxi) #affiche le coefficient max du vecteur propre
+
+
+
 
 
 ## ACP sur les caractéristiques standardisées
