@@ -57,6 +57,7 @@ print(df.shape)
 df.tail(2)
 df
 
+
 # %% [markdown]
 # ### Parenthèse sur descripteurs morphologiques 
 #
@@ -227,8 +228,11 @@ def histogram(serie, nbins) :
     """
     returns the histogram of a series of point, regrouping the values around nbins values 
     """
+    serie.plot.hist(nbins)
+    plt.show()
+ 
+
     return(serie.plot.hist(bins=nbins))
-    
 
 
 # %%
@@ -300,7 +304,7 @@ def correlation_plot(s1,s2):
     """
     returns the correlation between two series of point s1 and s2, drawing s1 on the x-axis and s2 on the y-axis
     """
-    plt.scatter(s1,s2, color='black', linewidths=0.1)
+    plt.scatter(s1,s2, color='black', s=5)
     plt.show()
 
 
@@ -389,6 +393,10 @@ triangle_inertie(df['lambda1'], df['lambda2'],'lambda1', 'lambda2')
 
 # %%
 def plot2D(df):
+    """
+    returns all the histograms of the columns of a dataframe and the correlation between two columns, without 
+    repetition of the correlation of the couple of columns
+    """
     n = len(list(df.columns)) #nombre de colonnes 
     for colonne in df.columns :
         print(histogram2(df[colonne], nbins = 30, xlabel = colonne, ylabel = 'frequency', hist_kwargs= {'color': 'blue'}))
@@ -418,18 +426,20 @@ plot2D(df[['radius1', 'lambda1', 'lambda2']])
 
 # %%
 def scatter_matrix(df, nbins, hist_kwargs):
+    """
+    returns a tab of graphs of a dataframe df, where all the histograms of the columns are on the diagonal. 
+    On each line are drawn the correlations between the column used for the histogram and the another columns, 
+    without repetition of the correlation of the couple of columns.
+    """
     n = len(list(df.columns)) #nombre de colonnes 
+    fig, axs = plt.subplots(n, n)
     for i in range(n) : #on rempli la diagonale du tableau avec les histogrammes
-        plt.subplot(3,3,i+1) 
-        xlabel = df.columns[i]
-        ylabel = 'frequency'
-        plt.plot(histogram2(df.iloc[:,i], nbins, xlabel, ylabel, hist_kwargs))
+        axs[i, i].hist(df.iloc[:,i], nbins)
         for j in range (n): #on parcourt les autres colonnes
             if j != i : 
-                plt.subplot(3,3,n*i+1+j)
-                plt.plot(correlation_plot2(df.iloc[:,i], df.iloc[:,j], xlabel = df.columns[i], ylabel = df.columns[j], plot_kwargs = {'marker': 'x', 'color': 'black'}))
-
-
+                axs[i, j].scatter(df.iloc[:,i], df.iloc[:,j], s=1)
+                
+    
 
 # %%
 # pour vérifier 
@@ -445,10 +455,17 @@ scatter_matrix(df[['radius1', 'lambda1', 'b2']], nbins=100, hist_kwargs={'color'
 #
 
 # %%
-for k in range len(df.columns):
-    print(scatter_matrix(df[['radius1', 'lambda1', 'b2']], nbins=100, hist_kwargs={'fc': 'g'}))
-    
-plt.plot()
+#L=[index for index in list(df.index) if 0.33 < df.iloc[index,1]< 0.35 and 0.33 < df.iloc[index,2]< 0.35]
+#print(L)
+L2=[i for i in list(df['id']) if 0.33 < df.iloc[index,1]< 0.35 and 0.33 < df.iloc[index,2]< 0.35]
+print(L2)
+
+
+# %%
+list(df.index)[-1]
+
+list(df.loc[:,'id'])
+
 
 # %% [markdown]
 # ## Analyse en composantes principales (ACP)
@@ -492,10 +509,10 @@ m, M = min(valpropres), max(valpropres)
 pas = (M-m)/len(valpropres)
 X=np.arange(int(m), int(M), pas)
 plt.loglog(X, valpropres, markersize=30)
-plt.legend('Tracé en echelle log-log')
+plt.title('Tracé en echelle log-log des valeurs propres')
 plt.show()
 plt.semilogy(X, valpropres, markersize=30)
-plt.legend('Tracé en echelle semi-log')
+plt.title('Tracé en echelle semi-log des valeurs propres')
 plt.show()
 
 # %% [markdown]
@@ -523,8 +540,11 @@ for i in range (N):
     LY.append(S_i / S_N)
 Y = np.array(LY)
 X = np.arange(0, len(LY), 1)
-plt.semilogy(X, Y, marker='+')
+plt.title(" Tracé en echelle log-log de l'évolution de alpha_i ")
+plt.loglog(X, Y, marker='+')
 plt.show()
+
+#
 
 # %% [markdown]
 # ### Quantité d'information contenue par la plus grande composante principale
