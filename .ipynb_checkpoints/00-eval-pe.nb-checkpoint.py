@@ -227,12 +227,8 @@ def histogram(serie, nbins) :
     """
     returns the histogram of a series of point, regrouping the values around nbins values 
     """
-    L=[]
-    for k in range(4040):
-        L.append(serie.iloc[k])
-    plt.hist(L, nbins)
-    plt.show()
-
+    return(serie.plot.hist(bins=nbins))
+    
 
 
 # %%
@@ -262,14 +258,14 @@ histogram(df[['radius1']], nbins=10)
 # <img src="media/defects-histogram2.png" width="400px">
 
 # %%
-def histogram2(serie, nbins, xlabel,ylabel,hist_kwargs) :
+def histogram2(serie, nbins, xlabel, ylabel, hist_kwargs) :
     """
     returns the histogram of a series of point, regrouping the values around nbins values 
     """
     L=[]
     for k in range(4040):
         L.append(serie.iloc[k])
-    plt.hist(L, nbins, color = hist_kwargs['color'])
+    plt.hist(L, nbins, color=hist_kwargs['color'])
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.show()
@@ -301,7 +297,10 @@ else:
 
 # %%
 def correlation_plot(s1,s2):
-    plt.scatter(s1,s2)
+    """
+    returns the correlation between two series of point s1 and s2, drawing s1 on the x-axis and s2 on the y-axis
+    """
+    plt.scatter(s1,s2, color='black', linewidths=0.1)
     plt.show()
 
 
@@ -326,6 +325,10 @@ correlation_plot(df['lambda1'], df['lambda2'])
 
 # %%
 def correlation_plot2(s1, s2, xlabel, ylabel, plot_kwargs):
+    """
+    returns the correlation between two series of point s1 and s2, drawing s1 on the x-axis and s2 on the y-axis,
+    and representing every point with a red cross
+    """
     plt.scatter(s1, s2, marker = plot_kwargs['marker'], color = plot_kwargs['color'])
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
@@ -357,23 +360,19 @@ else:
 # (Vous pouvez faire ce bonus sans avoir fait le précédent)
 
 # %%
-def f(x):
-    if 1/3 < x < 1/2 :
-        return(-0.5 ** x + 0.5) #calculé à partir de la pente et de l'ordonnée à l'origine
+def triangle_inertie (s1, s2, xlabel, ylabel):
+    """
+    returns the correlation between two series of point s1 and s2 with the triangle of inertia 
+    """
+    X = [1/3, 1/2, 1/2, 1/3]
+    Y = [1/3, 1/4, 1/2, 1/3]
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.plot(X, Y, linestyle = 'dashed', color = 'red')
+    correlation_plot(s1, s2)
+    plt.show()
 
-f1=np.vectorize(f)
-
-def f2(x):
-    if 1/3 < x < 1/2 :
-        return(x)
-    
-X = np.linspace(0.20, 0.55, 100)
-Y1 = f1(X)
-Y2 = f2(X)
-Y3 = np.array([0.5]*20)
-Y = np.concatenate((Y1, Y2, Y3))
-plt.plot(X, Y, linestyle = 'dashed', color = 'red')
-plt.show()
+triangle_inertie(df['lambda1'], df['lambda2'],'lambda1', 'lambda2')
 
 
 # %% [markdown]
@@ -390,11 +389,12 @@ plt.show()
 
 # %%
 def plot2D(df):
-    for colonne in df.columns :
-        print(histogram2(df[colonne], nbins = 20, xlabel = colonne, ylabel = 'frequency', hist_kwargs= {'color': 'blue'}))
     n = len(list(df.columns)) #nombre de colonnes 
-    for i in range(1):
-        for j in range(i+1, 2):
+    for colonne in df.columns :
+        print(histogram2(df[colonne], nbins = 30, xlabel = colonne, ylabel = 'frequency', hist_kwargs= {'color': 'blue'}))
+    n = len(list(df.columns)) #nombre de colonnes 
+    for i in range(n-1):
+        for j in range(i+1, n):
             print(correlation_plot2(df[df.columns[i]], df[df.columns[j]], xlabel = df.columns[i], ylabel = df.columns[j], plot_kwargs = {'marker': 'x', 'color': 'black'}))
 
 
@@ -417,25 +417,24 @@ plot2D(df[['radius1', 'lambda1', 'lambda2']])
 # <img src="media/defects-matrix.png" width="500px">
 
 # %%
-def scatter_matrix(df):
+def scatter_matrix(df, nbins, hist_kwargs):
     n = len(list(df.columns)) #nombre de colonnes 
-    M = np.zeros((n,n) 
-    c = 0
-    for colonne in df.columns : #on trace la diagonale
-        M[c,c] = histogram2(df[colonne], nbins = 10, xlabel = colonne, ylabel = 'frequency',
-       hist_kwargs={'color': 'red'})
-        c+=1
-    for i in range(n):
-        for j in range(n):
-            if i!=j : 
-                M[i,j] = correlation_plot2(df[i], df[j], xlabel = df.columns[i], ylabel = df.columns[j], plot_kwargs = {'marker': 'x', 'color': 'red'})
+    for i in range(n) : #on rempli la diagonale du tableau avec les histogrammes
+        plt.subplot(3,3,i+1) 
+        xlabel = df.columns[i]
+        ylabel = 'frequency'
+        plt.plot(histogram2(df.iloc[:,i], nbins, xlabel, ylabel, hist_kwargs))
+        for j in range (n): #on parcourt les autres colonnes
+            if j != i : 
+                plt.subplot(3,3,n*i+1+j)
+                plt.plot(correlation_plot2(df.iloc[:,i], df.iloc[:,j], xlabel = df.columns[i], ylabel = df.columns[j], plot_kwargs = {'marker': 'x', 'color': 'black'}))
 
 
 
 # %%
 # pour vérifier 
 
-scatter_matrix(df[['radius1', 'lambda1', 'b2']], nbins=100, hist_kwargs={'fc': 'g'})
+scatter_matrix(df[['radius1', 'lambda1', 'b2']], nbins=100, hist_kwargs={'color': 'g'})
 
 # %% [markdown]
 # ### Corrélations entre les données
@@ -499,7 +498,6 @@ plt.semilogy(X, valpropres, markersize=30)
 plt.legend('Tracé en echelle semi-log')
 plt.show()
 
-
 # %% [markdown]
 # ### Analyse de l'importance relative des composantes principales
 
@@ -515,7 +513,18 @@ plt.show()
 # $\alpha_i$ peut être interprété comme *la part d'information du jeu de données initial contenu dans les $i$ premières composantes principales*.
 
 # %%
-# votre code ici
+import copy
+V = list(valpropres)
+N = len(V)
+LY=[] #liste des alpha_i 
+S_N = sum(V[:N])
+for i in range (N):
+    S_i = sum(valpropres[:i])
+    LY.append(S_i / S_N)
+Y = np.array(LY)
+X = np.arange(0, len(LY), 1)
+plt.semilogy(X, Y, marker='+')
+plt.show()
 
 # %% [markdown]
 # ### Quantité d'information contenue par la plus grande composante principale
@@ -531,16 +540,21 @@ plt.show()
 # En observant les données correspondant à cette caractéristique, avez-vous une idée de ce qui s'est passé ? 
 
 # %%
-# votre code ici
+valpropre_max = V[0] #valeur propre max = la première car liste triée dans l'ordre décroissant
+V2 = list(vectpropres)
+vecteurpropre_max = V2[0] #vecteur propre max 
+L_vpmax = list(vecteurpropre_max)
+maxi = max([-min(L_vpmax), max(L_vpmax )]) 
+print(maxi) #affiche le coefficient max du vecteur propre
 
-# %% [markdown]
-# ## ACP sur les caractéristiques standardisées
-#
-# Dans la section précédente, la première composante principale ne prenait en compte que la caractéristique de plus grande variance. Un moyen de s'affranchir de ce problème consiste à **standardiser** les données. Pour un échantillon $Y$ de taille $N$, la variable standardisée correspondante est $Y_{std}=(Y-\bar{Y})/\sigma(Y)$ où $\bar{Y}$ est la moyenne empirique de l'échantillon et $\sigma(Y)$ son écart type empirique. 
-#
-# **Notez que** dans notre cas, il faut réaliser la standardisation **caractéristique par caractéristique** (soit colonne par colonne). Si vous n'y avez pas encore pensé, refaites un petit tour sur le cours d'agrégation pour faire ça de manière super efficace ! ;) 
-#
-# Menez la même étude que précédement (i.e. à partir de la section `Analyse en composantes principales`) jusqu'à tracer l'évolution des $\alpha_i$.
+
+## ACP sur les caractéristiques standardisées
+
+#Dans la section précédente, la première composante principale ne prenait en compte que la caractéristique de plus grande variance. Un moyen de s'affranchir de ce problème consiste à **standardiser** les données. Pour un échantillon $Y$ de taille $N$, la variable standardisée correspondante est $Y_{std}=(Y-\bar{Y})/\sigma(Y)$ où $\bar{Y}$ est la moyenne empirique de l'échantillon et $\sigma(Y)$ son écart type empirique. 
+
+#**Notez que** dans notre cas, il faut réaliser la standardisation **caractéristique par caractéristique** (soit colonne par colonne). Si vous n'y avez pas encore pensé, refaites un petit tour sur le cours d'agrégation pour faire ça de manière super efficace ! ;) 
+
+#Menez la même étude que précédement (i.e. à partir de la section `Analyse en composantes principales`) jusqu'à tracer l'évolution des $\alpha_i$.
 
 # %%
 def standardiser(Y):
