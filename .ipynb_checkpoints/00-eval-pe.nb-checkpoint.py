@@ -454,12 +454,17 @@ scatter_matrix(df[['radius1', 'lambda1', 'b2']], nbins=100, hist_kwargs={'color'
 # Plottez la corrélation qui vous semble la plus frappante (i.e. la plus informative), motivez votre choix.
 #
 
+# %% [markdown]
+# Réponse : 
+# On observe toutes les correlations avec scatter_matrix(df[df.columns], nbins=100, hist_kwargs={'color': 'g'})
+
 # %%
 # on observe toutes les correlations : scatter_matrix(df[df.columns], nbins=100, hist_kwargs={'color': 'g'})
 
 #la meilleur correlation semble etre celle entre la 4eme et la 5eme colonne, pusiqu'on voit apparaitre une droite linéaire sur le graphe de corrélation
 
-scatter_matrix(df[['convexity','sphericity']], nbins=100, hist_kwargs={'color': 'g'})
+scatter_matrix(df[['convexity','sphericity']], nbins=100, hist_kwargs={'color': 'g'}) 
+
 
 # %% [markdown]
 # ## Analyse en composantes principales (ACP)
@@ -552,8 +557,11 @@ plt.show()
 # En observant les données correspondant à cette caractéristique, avez-vous une idée de ce qui s'est passé ? 
 
 # %%
+valpropre_max = V[0] #valeur propre max = la première car liste triée dans l'ordre décroissant
 eigenvalue_max = V[0] #valeur propre max = la première car liste triée dans l'ordre décroissant
-V2 = list(eigvects)
+V2 = list(vectpropres)
+vecteurpropre_max = V2[0] #vecteur propre max 
+L_vpmax = list(vecteurpropre_max)
 print ("La valeur propre max est", V[0], "et le vecteur propre associé est", V2[0]) 
 
 
@@ -563,27 +571,61 @@ print( "La quantité d'information contenue par cette composante est de", V[0]/S
 
 L_eigvectmax = list(vecteurpropre_max)
 maxi = max([-min(L_vpmax), max(L_vpmax )]) 
+print(maxi) #affiche le coefficient max du vecteur propre
 print("Le coefficient max en valeur absolu de cette composante principale est :", maxi) #affiche le coefficient max du vecteur propre
 
+# %% [markdown]
+# ## ACP sur les caractéristiques standardisées
+#
+# #Dans la section précédente, la première composante principale ne prenait en compte que la caractéristique de plus grande variance. Un moyen de s'affranchir de ce problème consiste à **standardiser** les données. Pour un échantillon $Y$ de taille $N$, la variable standardisée correspondante est $Y_{std}=(Y-\bar{Y})/\sigma(Y)$ où $\bar{Y}$ est la moyenne empirique de l'échantillon et $\sigma(Y)$ son écart type empirique. 
+#
+# #**Notez que** dans notre cas, il faut réaliser la standardisation **caractéristique par caractéristique** (soit colonne par colonne). Si vous n'y avez pas encore pensé, refaites un petit tour sur le cours d'agrégation pour faire ça de manière super efficace ! ;) 
+#
+# #Menez la même étude que précédement (i.e. à partir de la section `Analyse en composantes principales`) jusqu'à tracer l'évolution des $\alpha_i$.
 
 # %%
-## ACP sur les caractéristiques standardisées
+import copy 
+def standardiser(df):
+    df2 = copy.copy(df) 
+    for col in df.columns:
+        moyenne = np.mean(df[col])
+        ecart_type = np.std(df[col])
+        for elt in df2[col]:
+            elt = (elt - moyenne) / ecart_type
+    return(df2)
 
-#Dans la section précédente, la première composante principale ne prenait en compte que la caractéristique de plus grande variance. Un moyen de s'affranchir de ce problème consiste à **standardiser** les données. Pour un échantillon $Y$ de taille $N$, la variable standardisée correspondante est $Y_{std}=(Y-\bar{Y})/\sigma(Y)$ où $\bar{Y}$ est la moyenne empirique de l'échantillon et $\sigma(Y)$ son écart type empirique. 
-
-#**Notez que** dans notre cas, il faut réaliser la standardisation **caractéristique par caractéristique** (soit colonne par colonne). Si vous n'y avez pas encore pensé, refaites un petit tour sur le cours d'agrégation pour faire ça de manière super efficace ! ;) 
-
-#Menez la même étude que précédement (i.e. à partir de la section `Analyse en composantes principales`) jusqu'à tracer l'évolution des $\alpha_i$.
-
-# %%
-def standardiser(Y):
-    moyenne = np.mean(Y)
-    ecart_type = np.std(Y)
-    return((Y - moyenne) / ecart_type)
-standardiser([1,2])
+df2 = standardiser(df)
 
 # %%
+X2 = df2.to_numpy()
+C2 = np.dot(np.transpose(X2), X2) #matrice de taille (9,9)
 
+eigvals2, mat2 = alg.eig(C2) #eig renvoie un tuple d'un array valeurs propres de C et d'un array de vecteurs propres en colonnes
+eigvects2 = np.transpose(mat2) #pour une meilleure lisibilité
+
+X2=np.arange(1, 10, 1)
+plt.loglog(X2, eigvals2, marker='o')
+plt.title('Tracé en echelle log-log des valeurs propres')
+plt.show()
+plt.semilogy(X2, eigvals2, marker='o')
+plt.title('Tracé en echelle semi-log des valeurs propres')
+plt.show()
+
+V2 = list(eigvals2) #listes des valeurs propres déjà triée dans l'ordre décroissant
+N2 = len(V2)
+LY2=[] #liste des alpha_i 
+S_N2 = sum(V2[:N2])
+for i in range (N2):
+    S_i2 = sum(eigvals[:i])
+    LY.append(S_i2 / S_N2)
+Y2 = np.array(LY2)
+X2 = np.arange(0, len(LY2), 1)
+plt.title(" Tracé en echelle semilogy de l'évolution de alpha_i ")
+plt.semilogy(X2, Y2, marker='+')
+plt.show()
+plt.title(" Tracé en echelle classique de l'évolution de alpha_i ")
+plt.plot(X2, Y2, marker='+')
+plt.show()
 
 
 # %% [markdown]
@@ -593,7 +635,7 @@ standardiser([1,2])
 #
 
 # %%
-print("La quantité d'information contenue par cette composante est de", (V[0]+V[1]+V[2])/S, "%.")
+print("La quantité d'information contenue par cette composante est de", ((V[0]+V[1]+V[2])/S)*100, "%.")
 
 # %% [markdown]
 # Cette part d'information est satisfaisante car nous avons tout de même réduit notre dimension de 9 à 3.
@@ -608,10 +650,28 @@ print("La quantité d'information contenue par cette composante est de", (V[0]+V
 # Créez une nouvelle dataframe dont les colonnes correspondent aux projections sur le sous-espace des 3 vecteurs propres prépondérants; on appellera ses colonnes P1, P2 et P3
 
 # %%
-# votre code
+v1 = eigvects2[0]
+v2 = eigvects2[1]
+v3 = eigvects2[2]
+
+df_p = pd.DataFrame(index=df2.index, columns=['P1', 'P2', 'P3'])
+
+for i in df_p.index:
+    df_p.loc[i, 'P1'] = np.dot(np.array(df2.loc[i]), v1)
+    df_p.loc[i, 'P2'] = np.dot(np.array(df2.loc[i]), v2)
+    df_p.loc[i, 'P3'] = np.dot(np.array(df2.loc[i]), v3)
 
 # %% [markdown]
 # Tracez les nuages de points correspondants dans les plans (P1, P2) et (P1, P3). 
+
+# %%
+correlation_plot2(df_p['P1'], df_p['P2'], 
+                      xlabel='P1', ylabel='P2',
+                      plot_kwargs={'marker': 'x', 'color': 'red'})
+
+correlation_plot2(df_p['P1'], df_p['P3'], 
+                      xlabel='P1', ylabel='P2',
+                      plot_kwargs={'marker': 'x', 'color': 'red'})
 
 # %% [markdown]
 # ## La conclusion
@@ -626,7 +686,23 @@ from utilities import plot_defect
 from importlib import reload
 
 # %%
-# Votre code ici
+ligne_4022 = df_p.loc[4022]
+s_min = 0
+for j in range (3): #on definit la distance euclidienne min initiale comme celle entre le défaut 1 et le 4022 
+    s_min += (ligne_4022.iloc[j] - df_p.iloc[0, j]) ** 2
+d_min = np.sqrt(s_min)
+i_min = 0
+
+for k in range (1, 4040): #on parcourt tous les défauts 
+    s = 0 
+    if k != 4022 : #on exclu le defaut 4022 ou la distance à lui-meme est nulle 
+        for j in range (3):
+            s += (ligne_4022.iloc[j] - df_p.iloc[k, j]) ** 2
+            distance = np.sqrt(s)
+            if distance < d_min :
+                d_min = distance
+                i_min = k
+print(i_min)
 
 
 # %%

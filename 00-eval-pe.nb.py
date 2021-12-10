@@ -665,8 +665,13 @@ for i in df_p.index:
 # Tracez les nuages de points correspondants dans les plans (P1, P2) et (P1, P3). 
 
 # %%
-plt.plot(df_p['P1'],df_p['P2'])
-plt.show()
+correlation_plot2(df_p['P1'], df_p['P2'], 
+                      xlabel='P1', ylabel='P2',
+                      plot_kwargs={'marker': 'x', 'color': 'red'})
+
+correlation_plot2(df_p['P1'], df_p['P3'], 
+                      xlabel='P1', ylabel='P2',
+                      plot_kwargs={'marker': 'x', 'color': 'red'})
 
 # %% [markdown]
 # ## La conclusion
@@ -681,7 +686,23 @@ from utilities import plot_defect
 from importlib import reload
 
 # %%
-# Votre code ici
+ligne_4022 = df_p.loc[4022]
+s_min = 0
+for j in range (3): #on definit la distance euclidienne min initiale comme celle entre le défaut 1 et le 4022 
+    s_min += (ligne_4022.iloc[j] - df_p.iloc[0, j]) ** 2
+d_min = np.sqrt(s_min)
+i_min = 0
+
+for k in range (1, 4040): #on parcourt tous les défauts 
+    s = 0 
+    if k != 4022 : #on exclu le defaut 4022 ou la distance à lui-meme est nulle 
+        for j in range (3):
+            s += (ligne_4022.iloc[j] - df_p.iloc[k, j]) ** 2
+            distance = np.sqrt(s)
+            if distance < d_min :
+                d_min = distance
+                i_min = k
+print(i_min)
 
 
 # %%
