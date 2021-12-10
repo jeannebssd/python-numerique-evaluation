@@ -487,10 +487,10 @@ C = np.dot(np.transpose(X), X) #matrice de taille (9,9)
 
 # %%
 import numpy.linalg as alg
-valpropres, mat = alg.eig(C) #eig renvoie un tuple d'un array valeurs propres de C et d'un array de vecteurs propres en colonnes
-vectpropres=np.transpose(mat) #pour une meilleure lisibilité
+eigvals, mat = alg.eig(C) #eig renvoie un tuple d'un array valeurs propres de C et d'un array de vecteurs propres en colonnes
+eigvects = np.transpose(mat) #pour une meilleure lisibilité
 
-print(valpropres, vectpropres) # retourne des arrays contenant les valeurs propres et vecteurs propres de C
+print(eigvals, eigvects) # retourne des arrays contenant les valeurs propres et vecteurs propres de C
 
 # %% [markdown]
 # ### Tracé des valeurs propres
@@ -500,10 +500,10 @@ print(valpropres, vectpropres) # retourne des arrays contenant les valeurs propr
 
 # %%
 X=np.arange(1, 10, 1)
-plt.loglog(X, valpropres, marker='o')
+plt.loglog(X, eigvals, marker='o')
 plt.title('Tracé en echelle log-log des valeurs propres')
 plt.show()
-plt.semilogy(X, valpropres, marker='o')
+plt.semilogy(X, eigvals, marker='o')
 plt.title('Tracé en echelle semi-log des valeurs propres')
 plt.show()
 
@@ -522,20 +522,21 @@ plt.show()
 # $\alpha_i$ peut être interprété comme *la part d'information du jeu de données initial contenu dans les $i$ premières composantes principales*.
 
 # %%
-V = list(valpropres)
-print(V) #listes des valeurs propres déjà triée dans l'ordre décroissant
+V = list(eigvals) #listes des valeurs propres déjà triée dans l'ordre décroissant
 N = len(V)
 LY=[] #liste des alpha_i 
 S_N = sum(V[:N])
 for i in range (N):
-    S_i = sum(valpropres[:i])
+    S_i = sum(eigvals[:i])
     LY.append(S_i / S_N)
 Y = np.array(LY)
 X = np.arange(0, len(LY), 1)
 plt.title(" Tracé en echelle semilogy de l'évolution de alpha_i ")
+plt.semilogy(X, Y, marker='+')
+plt.show()
+plt.title(" Tracé en echelle classique de l'évolution de alpha_i ")
 plt.plot(X, Y, marker='+')
 plt.show()
-
 
 # %% [markdown]
 # ### Quantité d'information contenue par la plus grande composante principale
@@ -552,7 +553,7 @@ plt.show()
 
 # %%
 eigenvalue_max = V[0] #valeur propre max = la première car liste triée dans l'ordre décroissant
-V2 = list(vectpropres)
+V2 = list(eigvects)
 print ("La valeur propre max est", V[0], "et le vecteur propre associé est", V2[0]) 
 
 
@@ -565,9 +566,7 @@ maxi = max([-min(L_vpmax), max(L_vpmax )])
 print("Le coefficient max en valeur absolu de cette composante principale est :", maxi) #affiche le coefficient max du vecteur propre
 
 
-
-
-
+# %%
 ## ACP sur les caractéristiques standardisées
 
 #Dans la section précédente, la première composante principale ne prenait en compte que la caractéristique de plus grande variance. Un moyen de s'affranchir de ce problème consiste à **standardiser** les données. Pour un échantillon $Y$ de taille $N$, la variable standardisée correspondante est $Y_{std}=(Y-\bar{Y})/\sigma(Y)$ où $\bar{Y}$ est la moyenne empirique de l'échantillon et $\sigma(Y)$ son écart type empirique. 
@@ -583,6 +582,10 @@ def standardiser(Y):
     return((Y - moyenne) / ecart_type)
 standardiser([1,2])
 
+# %%
+
+
+
 # %% [markdown]
 # ### Importance des composantes principales
 #
@@ -590,7 +593,7 @@ standardiser([1,2])
 #
 
 # %%
-# votre code ici
+print("La quantité d'information contenue par cette composante est de", (V[0]+V[1]+V[2])/S, "%.")
 
 # %% [markdown]
 # Cette part d'information est satisfaisante car nous avons tout de même réduit notre dimension de 9 à 3.

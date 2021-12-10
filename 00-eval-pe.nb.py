@@ -454,12 +454,17 @@ scatter_matrix(df[['radius1', 'lambda1', 'b2']], nbins=100, hist_kwargs={'color'
 # Plottez la corrélation qui vous semble la plus frappante (i.e. la plus informative), motivez votre choix.
 #
 
+# %% [markdown]
+# Réponse : 
+# On observe toutes les correlations avec scatter_matrix(df[df.columns], nbins=100, hist_kwargs={'color': 'g'})
+
 # %%
 # on observe toutes les correlations : scatter_matrix(df[df.columns], nbins=100, hist_kwargs={'color': 'g'})
 
 #la meilleur correlation semble etre celle entre la 4eme et la 5eme colonne, pusiqu'on voit apparaitre une droite linéaire sur le graphe de corrélation
 
-scatter_matrix(df[['convexity','sphericity']], nbins=100, hist_kwargs={'color': 'g'})
+scatter_matrix(df[['convexity','sphericity']], nbins=100, hist_kwargs={'color': 'g'}) 
+
 
 # %% [markdown]
 # ## Analyse en composantes principales (ACP)
@@ -487,10 +492,10 @@ C = np.dot(np.transpose(X), X) #matrice de taille (9,9)
 
 # %%
 import numpy.linalg as alg
-valpropres, mat = alg.eig(C) #eig renvoie un tuple d'un array valeurs propres de C et d'un array de vecteurs propres en colonnes
-vectpropres=np.transpose(mat) #pour une meilleure lisibilité
+eigvals, mat = alg.eig(C) #eig renvoie un tuple d'un array valeurs propres de C et d'un array de vecteurs propres en colonnes
+eigvects = np.transpose(mat) #pour une meilleure lisibilité
 
-print(valpropres, vectpropres) # retourne des arrays contenant les valeurs propres et vecteurs propres de C
+print(eigvals, eigvects) # retourne des arrays contenant les valeurs propres et vecteurs propres de C
 
 # %% [markdown]
 # ### Tracé des valeurs propres
@@ -500,10 +505,10 @@ print(valpropres, vectpropres) # retourne des arrays contenant les valeurs propr
 
 # %%
 X=np.arange(1, 10, 1)
-plt.loglog(X, valpropres, marker='o')
+plt.loglog(X, eigvals, marker='o')
 plt.title('Tracé en echelle log-log des valeurs propres')
 plt.show()
-plt.semilogy(X, valpropres, marker='o')
+plt.semilogy(X, eigvals, marker='o')
 plt.title('Tracé en echelle semi-log des valeurs propres')
 plt.show()
 
@@ -522,20 +527,21 @@ plt.show()
 # $\alpha_i$ peut être interprété comme *la part d'information du jeu de données initial contenu dans les $i$ premières composantes principales*.
 
 # %%
-V = list(valpropres)
-print(V) #listes des valeurs propres déjà triée dans l'ordre décroissant
+V = list(eigvals) #listes des valeurs propres déjà triée dans l'ordre décroissant
 N = len(V)
 LY=[] #liste des alpha_i 
 S_N = sum(V[:N])
 for i in range (N):
-    S_i = sum(valpropres[:i])
+    S_i = sum(eigvals[:i])
     LY.append(S_i / S_N)
 Y = np.array(LY)
 X = np.arange(0, len(LY), 1)
 plt.title(" Tracé en echelle semilogy de l'évolution de alpha_i ")
+plt.semilogy(X, Y, marker='+')
+plt.show()
+plt.title(" Tracé en echelle classique de l'évolution de alpha_i ")
 plt.plot(X, Y, marker='+')
 plt.show()
-
 
 # %% [markdown]
 # ### Quantité d'information contenue par la plus grande composante principale
@@ -551,8 +557,11 @@ plt.show()
 # En observant les données correspondant à cette caractéristique, avez-vous une idée de ce qui s'est passé ? 
 
 # %%
+valpropre_max = V[0] #valeur propre max = la première car liste triée dans l'ordre décroissant
 eigenvalue_max = V[0] #valeur propre max = la première car liste triée dans l'ordre décroissant
 V2 = list(vectpropres)
+vecteurpropre_max = V2[0] #vecteur propre max 
+L_vpmax = list(vecteurpropre_max)
 print ("La valeur propre max est", V[0], "et le vecteur propre associé est", V2[0]) 
 
 
@@ -562,26 +571,62 @@ print( "La quantité d'information contenue par cette composante est de", V[0]/S
 
 L_eigvectmax = list(vecteurpropre_max)
 maxi = max([-min(L_vpmax), max(L_vpmax )]) 
+print(maxi) #affiche le coefficient max du vecteur propre
 print("Le coefficient max en valeur absolu de cette composante principale est :", maxi) #affiche le coefficient max du vecteur propre
 
-
-
-
-
-## ACP sur les caractéristiques standardisées
-
-#Dans la section précédente, la première composante principale ne prenait en compte que la caractéristique de plus grande variance. Un moyen de s'affranchir de ce problème consiste à **standardiser** les données. Pour un échantillon $Y$ de taille $N$, la variable standardisée correspondante est $Y_{std}=(Y-\bar{Y})/\sigma(Y)$ où $\bar{Y}$ est la moyenne empirique de l'échantillon et $\sigma(Y)$ son écart type empirique. 
-
-#**Notez que** dans notre cas, il faut réaliser la standardisation **caractéristique par caractéristique** (soit colonne par colonne). Si vous n'y avez pas encore pensé, refaites un petit tour sur le cours d'agrégation pour faire ça de manière super efficace ! ;) 
-
-#Menez la même étude que précédement (i.e. à partir de la section `Analyse en composantes principales`) jusqu'à tracer l'évolution des $\alpha_i$.
+# %% [markdown]
+# ## ACP sur les caractéristiques standardisées
+#
+# #Dans la section précédente, la première composante principale ne prenait en compte que la caractéristique de plus grande variance. Un moyen de s'affranchir de ce problème consiste à **standardiser** les données. Pour un échantillon $Y$ de taille $N$, la variable standardisée correspondante est $Y_{std}=(Y-\bar{Y})/\sigma(Y)$ où $\bar{Y}$ est la moyenne empirique de l'échantillon et $\sigma(Y)$ son écart type empirique. 
+#
+# #**Notez que** dans notre cas, il faut réaliser la standardisation **caractéristique par caractéristique** (soit colonne par colonne). Si vous n'y avez pas encore pensé, refaites un petit tour sur le cours d'agrégation pour faire ça de manière super efficace ! ;) 
+#
+# #Menez la même étude que précédement (i.e. à partir de la section `Analyse en composantes principales`) jusqu'à tracer l'évolution des $\alpha_i$.
 
 # %%
-def standardiser(Y):
-    moyenne = np.mean(Y)
-    ecart_type = np.std(Y)
-    return((Y - moyenne) / ecart_type)
-standardiser([1,2])
+import copy 
+def standardiser(df):
+    df2 = copy.copy(df) 
+    for col in df.columns:
+        moyenne = np.mean(df[col])
+        ecart_type = np.std(df[col])
+        for elt in df2[col]:
+            elt = (elt - moyenne) / ecart_type
+    return(df2)
+
+df2 = standardiser(df)
+
+# %%
+X2 = df2.to_numpy()
+C2 = np.dot(np.transpose(X2), X2) #matrice de taille (9,9)
+
+eigvals2, mat2 = alg.eig(C2) #eig renvoie un tuple d'un array valeurs propres de C et d'un array de vecteurs propres en colonnes
+eigvects2 = np.transpose(mat2) #pour une meilleure lisibilité
+
+X2=np.arange(1, 10, 1)
+plt.loglog(X2, eigvals2, marker='o')
+plt.title('Tracé en echelle log-log des valeurs propres')
+plt.show()
+plt.semilogy(X2, eigvals2, marker='o')
+plt.title('Tracé en echelle semi-log des valeurs propres')
+plt.show()
+
+V2 = list(eigvals2) #listes des valeurs propres déjà triée dans l'ordre décroissant
+N2 = len(V2)
+LY2=[] #liste des alpha_i 
+S_N2 = sum(V2[:N2])
+for i in range (N2):
+    S_i2 = sum(eigvals[:i])
+    LY.append(S_i2 / S_N2)
+Y2 = np.array(LY2)
+X2 = np.arange(0, len(LY2), 1)
+plt.title(" Tracé en echelle semilogy de l'évolution de alpha_i ")
+plt.semilogy(X2, Y2, marker='+')
+plt.show()
+plt.title(" Tracé en echelle classique de l'évolution de alpha_i ")
+plt.plot(X2, Y2, marker='+')
+plt.show()
+
 
 # %% [markdown]
 # ### Importance des composantes principales
@@ -590,7 +635,7 @@ standardiser([1,2])
 #
 
 # %%
-# votre code ici
+print("La quantité d'information contenue par cette composante est de", ((V[0]+V[1]+V[2])/S)*100, "%.")
 
 # %% [markdown]
 # Cette part d'information est satisfaisante car nous avons tout de même réduit notre dimension de 9 à 3.
@@ -605,10 +650,23 @@ standardiser([1,2])
 # Créez une nouvelle dataframe dont les colonnes correspondent aux projections sur le sous-espace des 3 vecteurs propres prépondérants; on appellera ses colonnes P1, P2 et P3
 
 # %%
-# votre code
+v1 = eigvects2[0]
+v2 = eigvects2[1]
+v3 = eigvects2[2]
+
+df_p = pd.DataFrame(index=df2.index, columns=['P1', 'P2', 'P3'])
+
+for i in df_p.index:
+    df_p.loc[i, 'P1'] = np.dot(np.array(df2.loc[i]), v1)
+    df_p.loc[i, 'P2'] = np.dot(np.array(df2.loc[i]), v2)
+    df_p.loc[i, 'P3'] = np.dot(np.array(df2.loc[i]), v3)
 
 # %% [markdown]
 # Tracez les nuages de points correspondants dans les plans (P1, P2) et (P1, P3). 
+
+# %%
+plt.plot(df_p['P1'],df_p['P2'])
+plt.show()
 
 # %% [markdown]
 # ## La conclusion
