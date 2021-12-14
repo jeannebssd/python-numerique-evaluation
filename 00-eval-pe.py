@@ -182,9 +182,9 @@ for k in range (1, 4040): #on parcourt tout les défauts
     if k != 4022 : #on exclu le defaut 4022 ou la distance à lui-meme est nulle 
         for j in range (9):
             s += (ligne_4022.iloc[j] - df.iloc[k, j]) ** 2
-            distance = np.sqrt(s)
-            if distance < d_min :
-                d_min = distance
+            d = np.sqrt(s)
+            if d < d_min :
+                d_min = d
                 i_min = k
 print(i_min)
 
@@ -557,22 +557,23 @@ plt.show()
 # En observant les données correspondant à cette caractéristique, avez-vous une idée de ce qui s'est passé ? 
 
 # %%
-valpropre_max = V[0] #valeur propre max = la première car liste triée dans l'ordre décroissant
 eigenvalue_max = V[0] #valeur propre max = la première car liste triée dans l'ordre décroissant
-V2 = list(vectpropres)
-vecteurpropre_max = V2[0] #vecteur propre max 
-L_vpmax = list(vecteurpropre_max)
-print ("La valeur propre max est", V[0], "et le vecteur propre associé est", V2[0]) 
+W = list(eigvects)
+print ("La valeur propre max est", V[0], "et le vecteur propre associé est", W[0]) 
 
 
 #on sait que l'info est contenue dans les alpha_i
 S=sum(V)
 print( "La quantité d'information contenue par cette composante est de", V[0]/S, "%.") 
 
-L_eigvectmax = list(vecteurpropre_max)
-maxi = max([-min(L_vpmax), max(L_vpmax )]) 
-print(maxi) #affiche le coefficient max du vecteur propre
+
+L_coef = list(W[0])
+print("Les coefficients de cette composante principale sont", W[0])
+maxi = max([-min(L_coef), max(L_coef)]) 
 print("Le coefficient max en valeur absolu de cette composante principale est :", maxi) #affiche le coefficient max du vecteur propre
+
+
+
 
 # %% [markdown]
 # ## ACP sur les caractéristiques standardisées
@@ -600,7 +601,7 @@ df2 = standardiser(df)
 X2 = df2.to_numpy()
 C2 = np.dot(np.transpose(X2), X2) #matrice de taille (9,9)
 
-eigvals2, mat2 = alg.eig(C2) #eig renvoie un tuple d'un array valeurs propres de C et d'un array de vecteurs propres en colonnes
+eigvals2, mat2 = alg.eig(C2) #eig renvoie un tuple d'un array valeurs propres de C2 et d'un array de vecteurs propres en colonnes
 eigvects2 = np.transpose(mat2) #pour une meilleure lisibilité
 
 X2=np.arange(1, 10, 1)
@@ -617,7 +618,7 @@ LY2=[] #liste des alpha_i
 S_N2 = sum(V2[:N2])
 for i in range (N2):
     S_i2 = sum(eigvals[:i])
-    LY.append(S_i2 / S_N2)
+    LY2.append(S_i2 / S_N2)
 Y2 = np.array(LY2)
 X2 = np.arange(0, len(LY2), 1)
 plt.title(" Tracé en echelle semilogy de l'évolution de alpha_i ")
